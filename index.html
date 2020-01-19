@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru"> 
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление ссылки при копировании текста</title>	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	<script>
+		$(document).ready(function(){			
+			var ctrlDown = false, // положение клавиши Ctrl
+				// коды клавиш
+				ctrlKey = 17,
+				cmdKey = 91,
+				cKey = 67;
+
+			// проверка "зажатой" клавиши Ctrl
+			$(document).keydown(function(e) {
+				if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
+			}).keyup(function(e) {
+				if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = false;
+			});
+			
+			// обновление буфера обмена, при нажатии комбинации клавиш Ctrl + C
+			$(document).keydown(function(e) {
+				if (ctrlDown && e.keyCode == cKey) {
+					editBuffer();
+					return false;
+				};
+			});	
+			
+			// обновление буфера обмена, при выборе "Копировать" в контекстном меню
+			$(document).bind('copy', function() {
+				editBuffer();
+			});					
+		});		
+		
+		// функция для обновления буфера обмена
+		function editBuffer() {
+			var htmlContent = '';
+			// получение данных userAgent, чтобы проверить браузер
+			var ua = navigator.userAgent;			
+			if (ua.search(/MSIE/) > 0) {
+				// если браузер Internet Explorer
+				// получение выделенного текста
+				htmlContent = document.selection.createRange().htmlText;
+			} else {
+				// для всех остальных браузеров
+				// получение выделенного текста
+				var range = window.getSelection().getRangeAt(0);
+				htmlContent = range.toString();
+			}
+			// если удалось получить текст
+			if (htmlContent) {
+				// обновление содержимого буфера обмена
+				var tmp = document.createElement('INPUT');
+				// к выделенному тексту добавляется подпись и ссылка на текущую страницу
+				tmp.value = htmlContent + ' Узнайте больше на ' + location.href; 
+				document.body.appendChild(tmp);
+				tmp.select();
+				document.execCommand('copy');
+				document.body.removeChild(tmp);
+			}
+		}
+		
+	</script>
+</head> 
+<body>
+	<h1>Добавление ссылки при копировании текста</h1>
+    <p>
+		Текстовый текст, который можно выделить и скопировать в буффер обмена.
+	</p>	
+</body> 
+</html>
